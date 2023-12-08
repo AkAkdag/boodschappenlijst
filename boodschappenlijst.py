@@ -1,3 +1,10 @@
+# "# De broncode van dit programma is ontwikkeld met behulp van de programmeertaal Python, waarbij de programmeerstijl gericht is op objectgeoriënteerd programmeren (OOP). 
+# In deze implementatie worden de fundamentele principes van OOP toegepast om de software te structureren en functionaliteiten te organiseren. 
+# Dit omvat het gebruik van klassen en objecten om de verschillende entiteiten in het programma te modelleren, waardoor de code meer modulair, herbruikbaar en gemakkelijk te begrijpen wordt.
+# Het gebruik van OOP draagt bij aan een efficiënte ontwikkeling en onderhoud van de software, terwijl het ook de leesbaarheid en uitbreidbaarheid bevordert.
+
+
+
 import tkinter as tk
 from tkinter import messagebox
 
