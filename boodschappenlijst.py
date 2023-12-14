@@ -11,16 +11,17 @@ class BoodschappenLijst:
     def __init__(self):
         self.artikelen = {}
 
-    def voeg_artikel_toe(self, artikel, hoeveelheid=1):
+    def voeg_artikel_toe(self, artikel, hoeveelheid=1, prijs=0.0):
         if artikel in self.artikelen:
-            self.artikelen[artikel] += hoeveelheid
+            self.artikelen[artikel]['hoeveelheid'] += hoeveelheid
+            self.artikelen[artikel]['prijs'] += prijs
         else:
-            self.artikelen[artikel] = hoeveelheid
+            self.artikelen[artikel] = {'hoeveelheid': hoeveelheid, 'prijs': prijs}
 
     def verwijder_artikel(self, artikel, hoeveelheid=1):
         if artikel in self.artikelen:
-            self.artikelen[artikel] -= hoeveelheid
-            if self.artikelen[artikel] <= 0:
+            self.artikelen[artikel]['hoeveelheid'] -= hoeveelheid
+            if self.artikelen[artikel]['hoeveelheid'] <= 0:
                 del self.artikelen[artikel]
             return True
         return False
@@ -30,6 +31,10 @@ class BoodschappenLijst:
 
     def toon_lijst(self):
         return self.artikelen
+
+    def bereken_totaal_prijs(self):
+        totaal_prijs = sum(data['prijs'] for data in self.artikelen.values())
+        return totaal_prijs
 
 class BoodschappenLijstAppTkinter:
     def __init__(self, master):
@@ -56,6 +61,12 @@ class BoodschappenLijstAppTkinter:
         self.quantity_entry = tk.Entry(self.master)
         self.quantity_entry.pack()
 
+        self.price_label = tk.Label(self.master, text="Prijs:")
+        self.price_label.pack()
+
+        self.price_entry = tk.Entry(self.master)
+        self.price_entry.pack()
+
         self.add_button = tk.Button(self.master, text="Voeg toe", command=self.voeg_artikel_toe)
         self.add_button.config(**ronde_button_style)
         self.add_button.pack()
@@ -72,28 +83,37 @@ class BoodschappenLijstAppTkinter:
         self.clear_button.config(**ronde_button_style)
         self.clear_button.pack()
 
+        self.total_price_label = tk.Label(self.master, text="Totaal Prijs: €0.00")
+        self.total_price_label.pack()
+
         self.quit_button = tk.Button(self.master, text="Stoppen", command=self.master.destroy)
         self.quit_button.config(**ronde_button_style)
         self.quit_button.pack()
 
-        # Label to display the list
+        # Label om de lijst weer te geven
+        
         self.list_label = tk.Label(self.master, text="")
         self.list_label.pack()
 
     def voeg_artikel_toe(self):
         artikel = self.entry.get().upper()
         hoeveelheid = int(self.quantity_entry.get()) if self.quantity_entry.get() else 1
-        self.boodschappen_lijst.voeg_artikel_toe(artikel, hoeveelheid)
-        messagebox.showinfo("Succes", f"{hoeveelheid} x {artikel} is aan de lijst toegevoegd")
+        prijs_entry_value = self.price_entry.get().replace(',', '.')
+        prijs = float(prijs_entry_value) if prijs_entry_value else 0.0
+        self.boodschappen_lijst.voeg_artikel_toe(artikel, hoeveelheid, prijs)
+        messagebox.showinfo("Succes", f"{hoeveelheid} x {artikel} is aan de lijst toegevoegd voor €{prijs:.2f}")
         self.entry.delete(0, tk.END)
         self.quantity_entry.delete(0, tk.END)
+        self.price_entry.delete(0, tk.END)
+        self.update_total_price_label()
 
     def toon_lijst(self):
         lijst = self.boodschappen_lijst.toon_lijst()
         if not lijst:
             self.list_label.config(text="U heeft nul artikelen in uw lijst")
         else:
-            self.list_label.config(text="Artikelen in de lijst:\n" + "\n".join([f"{artikel}: {hoeveelheid}" for artikel, hoeveelheid in lijst.items()]))
+            self.list_label.config(text="Artikelen in de lijst:\n" + "\n".join([f"{artikel}: {data['hoeveelheid']} stuks, €{data['prijs']:.2f}" for artikel, data in lijst.items()]))
+        self.update_total_price_label()
 
     def verwijder_artikel(self):
         artikel = self.entry.get().upper()
@@ -104,10 +124,16 @@ class BoodschappenLijstAppTkinter:
             messagebox.showwarning("Waarschuwing", "Dat artikel staat niet in de lijst")
         self.entry.delete(0, tk.END)
         self.quantity_entry.delete(0, tk.END)
+        self.update_total_price_label()
 
     def wis_lijst(self):
         self.boodschappen_lijst.leegmaken_lijst()
         messagebox.showinfo("Succes", "Lijst is leeg")
+        self.update_total_price_label()
+
+    def update_total_price_label(self):
+        totaal_prijs = self.boodschappen_lijst.bereken_totaal_prijs()
+        self.total_price_label.config(text=f"Totaal Prijs: €{totaal_prijs:.2f}")
 
 def main():
     root = tk.Tk()
@@ -117,3 +143,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
