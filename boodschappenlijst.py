@@ -14,15 +14,17 @@ class BoodschappenLijst:
     def voeg_artikel_toe(self, artikel, hoeveelheid=1, prijs=0.0):
         if artikel in self.artikelen:
             self.artikelen[artikel]['hoeveelheid'] += hoeveelheid
-            self.artikelen[artikel]['prijs'] += prijs
+            self.artikelen[artikel]['prijs'] += (hoeveelheid * prijs)
         else:
-            self.artikelen[artikel] = {'hoeveelheid': hoeveelheid, 'prijs': prijs}
+            self.artikelen[artikel] = {'hoeveelheid': hoeveelheid, 'prijs': (hoeveelheid * prijs)}
 
     def verwijder_artikel(self, artikel, hoeveelheid=1):
         if artikel in self.artikelen:
             self.artikelen[artikel]['hoeveelheid'] -= hoeveelheid
             if self.artikelen[artikel]['hoeveelheid'] <= 0:
                 del self.artikelen[artikel]
+            else:
+                self.artikelen[artikel]['prijs'] -= (hoeveelheid * self.artikelen[artikel]['prijs'] / (self.artikelen[artikel]['hoeveelheid'] + hoeveelheid))
             return True
         return False
 
@@ -91,7 +93,6 @@ class BoodschappenLijstAppTkinter:
         self.quit_button.pack()
 
         # Label om de lijst weer te geven
-        
         self.list_label = tk.Label(self.master, text="")
         self.list_label.pack()
 
@@ -100,6 +101,7 @@ class BoodschappenLijstAppTkinter:
         hoeveelheid = int(self.quantity_entry.get()) if self.quantity_entry.get() else 1
         prijs_entry_value = self.price_entry.get().replace(',', '.')
         prijs = float(prijs_entry_value) if prijs_entry_value else 0.0
+
         self.boodschappen_lijst.voeg_artikel_toe(artikel, hoeveelheid, prijs)
         messagebox.showinfo("Succes", f"{hoeveelheid} x {artikel} is aan de lijst toegevoegd voor €{prijs:.2f}")
         self.entry.delete(0, tk.END)
@@ -143,4 +145,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
